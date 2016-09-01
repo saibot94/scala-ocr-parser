@@ -10,7 +10,16 @@ libraryDependencies ++= Seq(
   jdbc,
   cache,
   "org.postgresql" % "postgresql" % "9.4-1201-jdbc41",
-  ws
+  "org.jscience" % "jscience" % "4.3.1",
+    ws
 )
 
 libraryDependencies <+= scalaVersion("org.scala-lang" % "scala-compiler" % _ )
+
+
+lazy val generate = taskKey[Unit]("Copy staging files")
+
+generate := {
+  println(s"Copying staging files to right location")
+  Process("xcopy /E /Y .\\target\\universal\\stage C:\\Users\\darkg\\heroku-staging").lines foreach { l => println(s"copy> $l") }
+}
