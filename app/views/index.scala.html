@@ -1,4 +1,4 @@
-@(message: String)
+@(message: String, loveLetter : String)
 
 @main("GettingStarted") {
 
@@ -17,6 +17,12 @@
   @if(message != null){
   <div class="alert alert-success text-center" role="alert">
     @message
+  </div>
+  }
+
+  @if(loveLetter != null){
+  <div class="alert alert-danger text-center" role="alert">
+    @loveLetter
   </div>
   }
   <div class="alert alert-info text-center" role="alert">
