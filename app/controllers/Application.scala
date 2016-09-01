@@ -16,12 +16,11 @@ object Application extends Controller {
   def index = Action {
     RelativisticModel.select()
     val energy = scala.util.Properties.envOrElse("ENERGY", "12 GeV")
-    val loveLetter = scala.util.Properties.envOrElse("LOVE", "Te iubesc, Amy!")
 
     val m = Amount.valueOf(energy).to(KILOGRAM)
     val testRelativity = s"E=mc^2: $energy = $m"
 
-    Ok(views.html.index(testRelativity, loveLetter))
+    Ok(views.html.index(testRelativity))
   }
 
   def db = Action {
