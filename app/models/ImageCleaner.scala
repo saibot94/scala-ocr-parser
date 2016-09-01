@@ -3,7 +3,6 @@ package models
 import java.awt.Image
 import java.awt.image.BufferedImage
 import java.io.File
-import java.util.UUID
 import javax.imageio.ImageIO
 
 import scala.util.Random
