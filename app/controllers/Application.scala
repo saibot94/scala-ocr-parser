@@ -15,8 +15,9 @@ object Application extends Controller {
 
   def index = Action {
     RelativisticModel.select()
-    val m = Amount.valueOf("12 GeV").to(KILOGRAM)
-    val testRelativity = s"E=mc^2: 12GeV = $m"
+    val energy = scala.util.Properties.envOrElse("ENERGY", "12 GeV")
+    val m = Amount.valueOf(energy).to(KILOGRAM)
+    val testRelativity = s"E=mc^2: $energy = $m"
 
     Ok(views.html.index(testRelativity))
   }
