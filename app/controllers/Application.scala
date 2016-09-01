@@ -4,12 +4,13 @@ import play.api._
 import play.api.mvc._
 import play.api.cache.Cache
 import play.api.Play.current
-
 import play.api.db._
-
 import javax.measure.unit.SI.KILOGRAM
+
 import org.jscience.physics.model.RelativisticModel
 import org.jscience.physics.amount.Amount
+
+import scala.util.Random
 
 object Application extends Controller {
 
@@ -40,6 +41,23 @@ object Application extends Controller {
     } finally {
       conn.close()
     }
+
     Ok(out)
+  }
+
+  def upload = Action(parse.multipartFormData) {
+    request =>
+      request.body.file("picture").map {
+        picture =>
+          val filename = picture.filename
+          val contentType = picture.contentType
+
+          Ok.sendFile(
+            content = models.ImageCleaner.convertToBlackAndWhite(picture.ref.file),
+            fileName = _ => filename
+          ).as(contentType.getOrElse("image/jpeg"))
+      }.getOrElse {
+        Redirect(routes.Application.index).flashing("error" -> "Missing file")
+      }
   }
 }
