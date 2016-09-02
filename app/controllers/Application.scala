@@ -7,11 +7,11 @@ import play.api.Play.current
 import play.api.db._
 import javax.measure.unit.SI.KILOGRAM
 
-import models.utils.ImageCleaner
+import models.ocr.OCRService
+import models.utils.ImageTools
 import org.jscience.physics.model.RelativisticModel
 import org.jscience.physics.amount.Amount
-
-import models.primitives.RawImage
+import models.primitives.{RawImage, Row}
 
 object Application extends Controller {
 
@@ -52,31 +52,46 @@ object Application extends Controller {
         picture =>
           val filename = picture.filename
           val contentType = picture.contentType
-          val conversionResult = ImageCleaner.convertToBlackAndWhite(picture.ref.file)
+          val conversionResult = ImageTools.preprocessImage(picture.ref.file)
           val rawImage: RawImage = conversionResult._2
 
           println(s"[log] After conversion to byte array, the dimensions are as follows: ${rawImage.data.length}")
           println(s"[log] Width: ${rawImage.width}; Height: ${rawImage.height}")
-          //checkPositives(rawImage)
+          checkPositives(rawImage)
+          val rowsAndBoxes = (new OCRService).identifyLinesAndCharacters(rawImage)
+          printBoundingBoxes(rowsAndBoxes)
 
-          Ok.sendFile(
-            content = conversionResult._1,
-            fileName = _ => filename
+          Ok(
+            conversionResult._1.toByteArray
           ).as(contentType.getOrElse("image/jpeg"))
       }.getOrElse {
         Redirect(routes.Application.index).flashing("error" -> "Missing file")
       }
   }
 
+  private def printBoundingBoxes(rowsAndBoxes: List[Row]): Unit = {
+    println(s"${rowsAndBoxes.length} rows found")
+    rowsAndBoxes.foreach(
+      row =>
+        row.boundingBoxes.foreach(
+          box =>
+            println(s"box: ${box.leftUpX}, ${box.leftUpY}, ${box.lowerRightX}, ${box.lowerRightY}")
+
+        )
+    )
+  }
+
   private def checkPositives(rawImage: RawImage): Unit = {
     println(s"[log] Checking where characters may exist: ")
     var c = 0
     for (i <- rawImage.data.indices) {
-      if (rawImage.data(i).toInt != 0) {
-        println(s"found on pos: $i, value: ${rawImage.data(i).toInt}; ${rawImage.data(i)}; Binary rep: ${Integer.toBinaryString(rawImage.data(i))}")
-        c += 1
-        if (c == 100) {
-          return
+      for (j <- rawImage.data(i).indices) {
+        if (rawImage.data(i)(j) == 0) {
+          println(s"found on pos: $i,$j, value: ${rawImage.data(i)(j)}; ${rawImage.data(i)(j)};")
+          c += 1
+          if (c == 100) {
+            return
+          }
         }
       }
     }
