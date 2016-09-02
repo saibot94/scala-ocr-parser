@@ -87,8 +87,8 @@ object ImageCleaner {
   }
 
   private def resizeImage(width: Int, height: Int, sourceImage: BufferedImage): BufferedImage = {
-    val xScale = Math.max(width, sourceImage.getWidth)
-    val yScale = Math.max(height, sourceImage.getHeight)
+    val xScale = Math.min(width, sourceImage.getWidth)
+    val yScale = Math.min(height, sourceImage.getHeight)
 
     val scaledImage = sourceImage.getScaledInstance(xScale, yScale, Image.SCALE_SMOOTH)
     val resizedImage = new BufferedImage(xScale, yScale, sourceImage.getType)
