@@ -1,7 +1,6 @@
 package models
 
-import java.awt.Image
-import java.awt.image.BufferedImage
+import java.awt.image.{BufferedImage, RescaleOp}
 import java.io.File
 import javax.imageio.ImageIO
 
@@ -13,8 +12,8 @@ import scala.util.Random
 
 // This class takes the image from a request and returns a high-contrast, black and white image.
 object ImageCleaner {
-  def convertToBlackAndWhite(image: File, imageFormat: String = "jpeg"): File = {
-    val img = ImageIO.read(image)
+  def convertToBlackAndWhite(image: File, imageFormat: String = "jpeg", brightenFactor: Float = 1.3f): File = {
+    val img = brightenAndIncreaseContrast(ImageIO.read(image), brightenFactor)
     val blackAndWhiteImage = new BufferedImage(img.getWidth, img.getHeight, BufferedImage.TYPE_BYTE_BINARY)
     val graphics = blackAndWhiteImage.createGraphics()
     graphics.drawImage(img, 0, 0, null)
@@ -22,5 +21,10 @@ object ImageCleaner {
     val newTempImage = File.createTempFile("test" + Random.nextString(10), s".$imageFormat")
     ImageIO.write(blackAndWhiteImage, s"$imageFormat", newTempImage)
     newTempImage
+  }
+
+  private def brightenAndIncreaseContrast(img: BufferedImage, brightenFactor: Float): BufferedImage = {
+    val rescale = new RescaleOp(brightenFactor, 1.2f, null)
+    rescale.filter(img, img)
   }
 }
