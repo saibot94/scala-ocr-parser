@@ -1,13 +1,12 @@
 package models.utils
 
-import java.awt.geom.AffineTransform
 import java.awt.{Graphics2D, Image}
 import java.awt.image._
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File}
-import java.nio.ByteBuffer
+import java.io.{ByteArrayOutputStream, File}
 import javax.imageio.ImageIO
 
-import models.primitives.{RawImage, Row}
+import models.config.AppConfig
+import models.primitives.RawImage
 
 /**
   * Created by darkg on 01-Sep-16.
@@ -27,11 +26,11 @@ object ImageTools {
 
   def preprocessImage(image: File,
                       imageFormat: String = "jpeg",
-                      brightenFactor: Float = blackAndWhiteFactor): (ByteArrayOutputStream, RawImage) = {
-    // Preprocess image
+                      brightenFactor: Float = AppConfig.blackAndWhiteFactor): (ByteArrayOutputStream, RawImage) = {
+    // Pre-process image
     val preprocessedImage = convolutionOp(brightenAndIncreaseContrast(ImageIO.read(image), brightenFactor))
     // Next resize the image
-    val resizedPreprocessedImage = resizeImage(xScaleSize, yScaleSize, preprocessedImage)
+    val resizedPreprocessedImage = resizeImage(AppConfig.xScaleSize, AppConfig.yScaleSize, preprocessedImage)
     // Create b&w image
     val blackAndWhiteImage = createNewImageType(resizedPreprocessedImage, BufferedImage.TYPE_BYTE_BINARY)
     // Write the image to a file, so we serve it back to the user afterwards
