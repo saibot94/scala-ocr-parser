@@ -10,5 +10,6 @@ object AppConfig {
   val yScaleSize = scala.util.Properties.envOrElse("YSCALE_RESIZE", "1080").toInt
   val blackAndWhiteFactor = scala.util.Properties.envOrElse("BW_FACTOR", "1.5").toFloat
   val energy =  scala.util.Properties.envOrElse("ENERGY", "12 GeV")
+  val boundingBoxExtraSpace = scala.util.Properties.envOrElse("BOUNDING_BOX_EXTRA_SPACE", "1").toInt
 
 }

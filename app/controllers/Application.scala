@@ -82,7 +82,7 @@ object Application extends Controller {
     println(s"${rowsAndBoxes.length} rows found")
     rowsAndBoxes.foreach(
       row =>
-        row.boundingBoxes.foreach(
+        row.characterBoundingBoxes.foreach(
           box =>
             println(s"box: ${box.leftUpX}, ${box.leftUpY}, ${box.lowerRightX}, ${box.lowerRightY}")
 
