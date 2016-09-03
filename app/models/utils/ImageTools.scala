@@ -3,11 +3,11 @@ package models.utils
 import java.awt.geom.AffineTransform
 import java.awt.{Graphics2D, Image}
 import java.awt.image._
-import java.io.{ByteArrayOutputStream, File}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File}
 import java.nio.ByteBuffer
 import javax.imageio.ImageIO
 
-import models.primitives.RawImage
+import models.primitives.{RawImage, Row}
 
 /**
   * Created by darkg on 01-Sep-16.
@@ -20,7 +20,7 @@ object ImageTools {
   val yScaleSize = scala.util.Properties.envOrElse("YSCALE_RESIZE", "1080").toInt
   val blackAndWhiteFactor = scala.util.Properties.envOrElse("BW_FACTOR", "1.5").toFloat
 
-  private def createBlackAndWhiteImage(image: BufferedImage, imageType: Int) = {
+  def createNewImageType(image: BufferedImage, imageType: Int) = {
     val blackAndWhiteImage = new BufferedImage(image.getWidth,
       image.getHeight,
       imageType)
@@ -37,7 +37,7 @@ object ImageTools {
     // Next resize the image
     val resizedPreprocessedImage = resizeImage(xScaleSize, yScaleSize, preprocessedImage)
     // Create b&w image
-    val blackAndWhiteImage = createBlackAndWhiteImage(resizedPreprocessedImage, BufferedImage.TYPE_BYTE_BINARY)
+    val blackAndWhiteImage = createNewImageType(resizedPreprocessedImage, BufferedImage.TYPE_BYTE_BINARY)
     // Write the image to a file, so we serve it back to the user afterwards
     val outputStream = new ByteArrayOutputStream()
     ImageIO.write(blackAndWhiteImage, s"$imageFormat", outputStream)
@@ -45,9 +45,6 @@ object ImageTools {
     (outputStream, extractPixelsFromImage(blackAndWhiteImage))
   }
 
-  def drawBoundingBoxesOnImage(imageBytes: Array[Byte]): ByteArrayOutputStream = {
-    new ByteArrayOutputStream()
-  }
 
   private def brightenAndIncreaseContrast(img: BufferedImage, brightenFactor: Float): BufferedImage = {
     val rescale = new RescaleOp(brightenFactor, 1.5f, null)

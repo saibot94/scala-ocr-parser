@@ -1,5 +1,8 @@
 package controllers
 
+import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
+
 import play.api._
 import play.api.mvc._
 import play.api.cache.Cache
@@ -7,7 +10,7 @@ import play.api.Play.current
 import play.api.db._
 import javax.measure.unit.SI.KILOGRAM
 
-import models.ocr.OCRService
+import models.ocr.{BoundingBoxDrawer, OCRService}
 import models.utils.ImageTools
 import org.jscience.physics.model.RelativisticModel
 import org.jscience.physics.amount.Amount
@@ -57,16 +60,21 @@ object Application extends Controller {
 
           println(s"[log] After conversion to byte array, the dimensions are as follows: ${rawImage.data.length}")
           println(s"[log] Width: ${rawImage.width}; Height: ${rawImage.height}")
-          checkPositives(rawImage)
-          val rowsAndBoxes = (new OCRService).identifyLinesAndCharacters(rawImage)
-          printBoundingBoxes(rowsAndBoxes)
+          //checkPositives(rawImage)
+          val boundingBoxImage = getBoundingBoxImage(conversionResult._1.toByteArray, rawImage)
 
           Ok(
-            conversionResult._1.toByteArray
+            boundingBoxImage.toByteArray
           ).as(contentType.getOrElse("image/jpeg"))
       }.getOrElse {
         Redirect(routes.Application.index).flashing("error" -> "Missing file")
       }
+  }
+
+  private def getBoundingBoxImage(imageBytes: Array[Byte], rawImage: RawImage): ByteArrayOutputStream = {
+    val rowsAndBoxes = (new OCRService).identifyLinesAndCharacters(rawImage)
+    //printBoundingBoxes(rowsAndBoxes)
+    BoundingBoxDrawer(imageBytes).getBoundingBoxesImage(rowsAndBoxes)
   }
 
   private def printBoundingBoxes(rowsAndBoxes: List[Row]): Unit = {
