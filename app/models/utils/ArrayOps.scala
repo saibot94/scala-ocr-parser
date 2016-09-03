@@ -34,4 +34,18 @@ object ArrayOps {
     }
     sum
   }
+
+  def rectSum(arr: Array[Array[Byte]], x: Int, y: Int, width: Int, height: Int): Long = {
+    var sum: Long = 0
+    var i = y
+    var j = x
+    while (i < (y + height)) {
+      while (j < (x + width)) {
+        sum += arr(i)(j)
+        j += 1
+      }
+      i += 1
+    }
+    sum
+  }
 }
