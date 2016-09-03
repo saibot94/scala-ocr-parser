@@ -1,24 +1,22 @@
 package models.ocr
 
+import models.config.AppConfig
 import models.primitives.{BoundingBox, RawImage, Row}
 import models.utils.ArrayOps
 
 import scala.collection.mutable.ListBuffer
-import scala.util.control.Breaks._
 
 /**
   * Created by darkg on 02-Sep-16.
   */
 class OCRService {
-  val rowDetectionPixelThreshold = scala.util.Properties.envOrElse("PIXEL_ROW_DETECT_THRESHOLD", "15").toInt
-  val colDetectionPixelThreshold = scala.util.Properties.envOrElse("PIXEL_COL_DETECT_THRESHOLD", "5").toInt
 
   def identifyLinesAndCharacters(image: RawImage): List[Row] = {
     var resultRows = new ListBuffer[Row]
     var maxY: Option[Int] = None
     var minY: Option[Int] = None
     for (i <- image.data.indices) {
-      if (ArrayOps.efficientRowSum(image.data(i)) >= rowDetectionPixelThreshold) {
+      if (ArrayOps.efficientRowSum(image.data(i)) >= AppConfig.rowDetectionPixelThreshold) {
         maxY = Some(i)
         if (minY.isEmpty) {
           minY = Some(i)
@@ -38,7 +36,7 @@ class OCRService {
     var maxX: Option[Int] = None
     var minX: Option[Int] = None
     for (j <- imageRow(i).indices) {
-      if (ArrayOps.efficientColSum(imageRow, j, minY.get, maxY.get) > colDetectionPixelThreshold) {
+      if (ArrayOps.efficientColSum(imageRow, j, minY.get, maxY.get) > AppConfig.colDetectionPixelThreshold) {
         maxX = Some(j)
         if (minX.isEmpty) {
           minX = Some(j)
@@ -48,8 +46,8 @@ class OCRService {
         var maxYp = minY.get
         var exitLoop = false
         var k = maxY.get - 1
-        while (k >= minY.get && exitLoop) {
-          if (ArrayOps.efficientRowSum(imageRow(minX.get), k, maxX.get) < colDetectionPixelThreshold) {
+        while ((k >= minY.get) && !exitLoop) {
+          if (ArrayOps.efficientRowSum(imageRow(minX.get), k, maxX.get) < AppConfig.colDetectionPixelThreshold) {
             maxYp = k + 1
             exitLoop = true
           }

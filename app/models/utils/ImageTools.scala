@@ -16,10 +16,6 @@ import models.primitives.{RawImage, Row}
 // This class takes the image from a request and returns a high-contrast, black and white image.
 object ImageTools {
 
-  val xScaleSize = scala.util.Properties.envOrElse("XSCALE_RESIZE", "1920").toInt
-  val yScaleSize = scala.util.Properties.envOrElse("YSCALE_RESIZE", "1080").toInt
-  val blackAndWhiteFactor = scala.util.Properties.envOrElse("BW_FACTOR", "1.5").toFloat
-
   def createNewImageType(image: BufferedImage, imageType: Int) = {
     val blackAndWhiteImage = new BufferedImage(image.getWidth,
       image.getHeight,

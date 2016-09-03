@@ -10,6 +10,7 @@ import play.api.Play.current
 import play.api.db._
 import javax.measure.unit.SI.KILOGRAM
 
+import models.config.AppConfig
 import models.ocr.{BoundingBoxDrawer, OCRService}
 import models.utils.ImageTools
 import org.jscience.physics.model.RelativisticModel
@@ -20,7 +21,7 @@ object Application extends Controller {
 
   def index = Action {
     RelativisticModel.select()
-    val energy = scala.util.Properties.envOrElse("ENERGY", "12 GeV")
+    val energy = AppConfig.energy
 
     val m = Amount.valueOf(energy).to(KILOGRAM)
     val testRelativity = s"E=mc^2: $energy = $m"
