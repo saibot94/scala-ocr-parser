@@ -47,7 +47,7 @@ class OCRService {
         var exitLoop = false
         var k = maxY.get - 1
         while ((k >= minY.get) && !exitLoop) {
-          if (ArrayOps.rectSum(imageRow, minX.get, k, maxX.get - minX.get, 1) < AppConfig.colDetectionPixelThreshold) {
+          if (ArrayOps.rectSum(imageRow, minX.get, k, maxX.get - minX.get, 1) > AppConfig.colDetectionPixelThreshold) {
             maxYp = k + 1
             exitLoop = true
           }
