@@ -2,6 +2,7 @@ package controllers
 
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
+import javax.imageio.ImageIO
 
 import play.api._
 import play.api.mvc._
@@ -12,21 +13,13 @@ import javax.measure.unit.SI.KILOGRAM
 
 import models.config.AppConfig
 import models.ocr.{BoundingBoxDrawer, OCRService}
-import models.utils.ImageTools
-import org.jscience.physics.model.RelativisticModel
-import org.jscience.physics.amount.Amount
+import models.utils.{ImageCropper, ImageTools}
 import models.primitives.{RawImage, Row}
 
 object Application extends Controller {
 
   def index = Action {
-    RelativisticModel.select()
-    val energy = AppConfig.energy
-
-    val m = Amount.valueOf(energy).to(KILOGRAM)
-    val testRelativity = s"E=mc^2: $energy = $m"
-
-    Ok(views.html.index(testRelativity))
+    Ok(views.html.index(null))
   }
 
   def db = Action {
@@ -57,12 +50,18 @@ object Application extends Controller {
           val filename = picture.filename
           val contentType = picture.contentType
           val conversionResult = ImageTools.preprocessImage(picture.ref.file)
+          val imageByteArray = conversionResult._1.toByteArray
           val rawImage: RawImage = conversionResult._2
 
           println(s"[log] After conversion to byte array, the dimensions are as follows: ${rawImage.data.length}")
           println(s"[log] Width: ${rawImage.width}; Height: ${rawImage.height}")
           //checkPositives(rawImage)
-          val boundingBoxImage = getBoundingBoxImage(conversionResult._1.toByteArray, rawImage)
+          val rowsAndBoxes = (new OCRService).identifyLinesAndCharacters(rawImage)
+          val boundingBoxImage = getBoundingBoxImage(imageByteArray, rowsAndBoxes)
+          val croppedCharacters = ImageCropper.cropImage(imageByteArray, rowsAndBoxes.head.characterBoundingBoxes)
+
+          val outputStream = new ByteArrayOutputStream()
+          ImageIO.write(croppedCharacters.head, "jpeg", outputStream)
 
           Ok(
             boundingBoxImage.toByteArray
@@ -72,8 +71,7 @@ object Application extends Controller {
       }
   }
 
-  private def getBoundingBoxImage(imageBytes: Array[Byte], rawImage: RawImage): ByteArrayOutputStream = {
-    val rowsAndBoxes = (new OCRService).identifyLinesAndCharacters(rawImage)
+  private def getBoundingBoxImage(imageBytes: Array[Byte], rowsAndBoxes: List[Row]): ByteArrayOutputStream = {
     //printBoundingBoxes(rowsAndBoxes)
     BoundingBoxDrawer(imageBytes).getBoundingBoxesImage(rowsAndBoxes)
   }

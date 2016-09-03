@@ -22,7 +22,10 @@ class OCRService {
           minY = Some(i)
         }
       } else if (minY.isDefined) {
-        resultRows += Row(parseColumns(image.data, i, minY, maxY).toList)
+        val newRow = Row(parseColumns(image.data, i, minY, maxY).toList)
+        if (newRow.rowBoundingBox.isDefined) {
+          resultRows += newRow
+        }
         minY = None
       }
     }
@@ -36,7 +39,7 @@ class OCRService {
     var maxX: Option[Int] = None
     var minX: Option[Int] = None
     for (j <- imageRow(i).indices) {
-      if (ArrayOps.efficientColSum(imageRow, j, minY.get, maxY.get) > AppConfig.colDetectionPixelThreshold) {
+      if (ArrayOps.efficientColSum(imageRow, j, minY.get, maxY.get) >= AppConfig.colDetectionPixelThreshold) {
         maxX = Some(j)
         if (minX.isEmpty) {
           minX = Some(j)
@@ -48,7 +51,7 @@ class OCRService {
         var k = maxY.get - 1
 
         while ((k >= minY.get) && !exitLoop) {
-          if (ArrayOps.rectSum(imageRow, minX.get, k, maxX.get - minX.get, 1) > AppConfig.colDetectionPixelThreshold) {
+          if (ArrayOps.rectSum(imageRow, minX.get, k, maxX.get - minX.get, 1) >= AppConfig.colDetectionPixelThreshold) {
             maxYp = k + 1
             exitLoop = true
           }

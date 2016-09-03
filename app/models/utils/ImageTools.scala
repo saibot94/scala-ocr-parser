@@ -76,7 +76,7 @@ object ImageTools {
     RawImage(image.getWidth, image.getHeight, byteArray)
   }
 
-  private def toBufferedImage(img: Image, imageType: Int = BufferedImage.TYPE_BYTE_BINARY): BufferedImage = {
+  def toBufferedImage(img: Image, imageType: Int = BufferedImage.TYPE_BYTE_BINARY): BufferedImage = {
     img match {
       case image: BufferedImage =>
         return image;
