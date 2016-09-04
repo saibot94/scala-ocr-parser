@@ -7,10 +7,12 @@ import javax.imageio.ImageIO
 import models.document.{Document, DocumentParser}
 import play.api._
 import play.api.mvc._
+import play.api.libs.json._
+
 import play.api.cache.Cache
 import play.api.Play.current
 import play.api.db._
-import models.ocr.{BoundingBoxDrawer, FeatureDetector, OCRService}
+import models.ocr.{BoundingBoxDrawer, FeatureDetector, OCRService, TextBuilder}
 import models.utils.{ImageCropper, ImageTools}
 import models.primitives.{RawImage, Row}
 
@@ -41,11 +43,11 @@ object Application extends Controller {
     Ok(out)
   }
 
+
   def upload = Action(parse.multipartFormData) {
     request =>
       request.body.file("picture").map {
         picture =>
-          val filename = picture.filename
           val contentType = picture.contentType
           val conversionResult = ImageTools.preprocessImage(picture.ref.file)
           val imageByteArray = conversionResult._1.toByteArray
@@ -54,23 +56,16 @@ object Application extends Controller {
           println(s"[log] After conversion to byte array, the dimensions are as follows: ${rawImage.data.length}")
           println(s"[log] Width: ${rawImage.width}; Height: ${rawImage.height}")
           //checkPositives(rawImage)
-          val rows = OCRService().identifyLinesAndCharacters(rawImage)
-          val parsedDocument = DocumentParser.parseImageToDocument(rows)
+          val parsedDocument = getDocumentFromRawImage(rawImage)
           val boundingBoxImage = getBoundingBoxImage(imageByteArray, parsedDocument)
-
-
-          val croppedCharacters = ImageCropper.cropImage(imageByteArray, rows.head.boundingBoxes)
-          //val detector = FeatureDetector(Play.getFile("conf/resources").getAbsolutePath)
-          //croppedCharacters.foreach(character => detector.detectFeatures(character))
-
-
-          val outputStream = new ByteArrayOutputStream()
-          ImageIO.write(croppedCharacters.head, "jpeg", outputStream)
-
-          Ok(
-            boundingBoxImage.toByteArray
-            //outputStream.toByteArray
-          ).as(contentType.getOrElse("image/jpeg"))
+          val text = getTextFromImage(imageByteArray, parsedDocument)
+          println("[log] Done parsing text")
+          println(s"[log] The resulting text is: ${System.lineSeparator()} $text")
+          val jsResult: JsValue = JsObject(Seq(
+            "text" -> JsString(text),
+            "image" -> JsString(ImageTools.imageToBase64(boundingBoxImage.toByteArray))
+          ))
+          Ok(jsResult)
       }.getOrElse {
         Redirect(routes.Application.index).flashing("error" -> "Missing file")
       }
@@ -79,6 +74,27 @@ object Application extends Controller {
   private def getBoundingBoxImage(imageBytes: Array[Byte], document: Document): ByteArrayOutputStream = {
     //printBoundingBoxes(rowsAndBoxes)
     BoundingBoxDrawer(imageBytes).getBoundingBoxesImage(document)
+  }
+
+  private def getTextFromImage(imageByteArray: Array[Byte], parsedDocument: Document): String = {
+    val textBuilder = TextBuilder(imageByteArray, parsedDocument, Play.getFile("conf/resources").getAbsolutePath)
+    val text = textBuilder.getText
+    val sb = new StringBuilder
+    text foreach {
+      row =>
+        row.foreach {
+          word =>
+            sb ++= word.replace("\n", "").replace("\r", "")
+            sb += ' '
+        }
+        sb ++= System.lineSeparator()
+    }
+    sb.mkString
+  }
+
+  private def getDocumentFromRawImage(rawImage: RawImage): Document = {
+    val rows = OCRService().identifyLinesAndCharacters(rawImage)
+    DocumentParser.parseImageToDocument(rows)
   }
 
   //  private def printBoundingBoxes(rowsAndBoxes: List[Row]): Unit = {

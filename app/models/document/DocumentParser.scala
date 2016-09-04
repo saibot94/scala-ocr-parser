@@ -16,6 +16,7 @@ object DocumentParser {
       r =>
         result += ParsedRow(r.rowBoundingBox, parseWords(r))
     )
+
     result.toList
   }
 

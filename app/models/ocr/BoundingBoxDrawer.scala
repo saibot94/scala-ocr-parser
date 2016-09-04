@@ -47,24 +47,26 @@ class BoundingBoxDrawer(imageBytes: Array[Byte]) {
       drawWordBoundingBox(word.wordBoundingBox.get, graphics)
     }
     graphics.setColor(java.awt.Color.RED)
-    //word.boundingBoxes.foreach(character => drawCharacter(character, graphics))
+    word.boundingBoxes.foreach(character => drawCharacter(character, graphics))
 
   }
 
-  private def drawRow(row: ParsedRow, graphics: Graphics2D): Unit = {
+  private def drawRow(row: ParsedRow, graphics: Graphics2D, rowNum: Int): Unit = {
     row.words.foreach(word => drawWord(word, graphics))
     // Draw Row bounding box
-    var i = 0
     if (row.boundingBox.isDefined) {
-     // drawRowBoundingBox(graphics, row.boundingBox.get, i)
-      i += 1
+      drawRowBoundingBox(graphics, row.boundingBox.get, rowNum)
     }
   }
 
   private def drawingProcedure(image: BufferedImage,
                                document: Document): BufferedImage = {
     val graphics = image.createGraphics()
-    document.rows.foreach(row => drawRow(row, graphics))
+    var rowNum = 0
+    document.rows.foreach(row => {
+      drawRow(row, graphics, rowNum); rowNum += 1
+    })
+
     image
   }
 

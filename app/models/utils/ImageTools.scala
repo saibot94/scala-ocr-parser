@@ -2,11 +2,13 @@ package models.utils
 
 import java.awt.{Graphics2D, Image, RenderingHints}
 import java.awt.image._
-import java.io.{ByteArrayOutputStream, File}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File}
+import java.util.Base64
 import javax.imageio.ImageIO
 
 import models.config.AppConfig
 import models.primitives.RawImage
+import org.apache.commons.io.IOUtils
 
 /**
   * Created by darkg on 01-Sep-16.
@@ -104,5 +106,9 @@ object ImageTools {
     val resizedImage = new BufferedImage(xScale, yScale, sourceImage.getType)
     resizedImage.createGraphics.drawImage(scaledImage, 0, 0, null)
     resizedImage
+  }
+
+  def imageToBase64(image : Array[Byte]) : String = {
+    Base64.getEncoder.encodeToString(image)
   }
 }

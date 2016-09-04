@@ -23,14 +23,11 @@ object ImageCropper {
     var crops = ListBuffer[BufferedImage]()
     val inputStream = new ByteArrayInputStream(imageBytes)
     val sourceImage = ImageIO.read(inputStream)
-    boundingBoxes.foreach(
+    boundingBoxes.map {
       bb => {
-        cropBoundingBox(sourceImage, bb).foreach(bi => {
-          crops += bi
-        })
+        cropBoundingBox(sourceImage, bb)
       }
-    )
-    crops.toList
+    }.filter(p => p.isDefined).map(bi => bi.get)
   }
 
   def cropBoundingBox(image: BufferedImage, boundingBox: BoundingBox): Option[BufferedImage] = {
