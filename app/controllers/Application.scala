@@ -81,7 +81,7 @@ object Application extends Controller {
   }
 
   private def getTextFromImage(imageByteArray: Array[Byte], parsedDocument: Document): String = {
-    val textBuilder = TextBuilder(imageByteArray, parsedDocument, Play.getFile("conf/resources").getPath)
+    val textBuilder = TextBuilder(imageByteArray, parsedDocument, Play.getFile("resources").getCanonicalPath)
     val text = textBuilder.getText
     val sb = new StringBuilder
     text foreach {

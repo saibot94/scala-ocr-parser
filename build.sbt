@@ -17,6 +17,8 @@ libraryDependencies ++= Seq(
 
 libraryDependencies <+= scalaVersion("org.scala-lang" % "scala-compiler" % _)
 
+import com.typesafe.sbt.packager.MappingsHelper._
+mappings in Universal ++= directory(baseDirectory.value / "resources")
 
 lazy val generate = taskKey[Unit]("Copy staging files")
 
