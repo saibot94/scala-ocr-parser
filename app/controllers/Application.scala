@@ -8,6 +8,7 @@ import models.document.{Document, DocumentParser}
 import play.api._
 import play.api.mvc._
 import play.api.libs.json._
+import play.api.Environment
 
 import play.api.cache.Cache
 import play.api.Play.current
@@ -17,6 +18,9 @@ import models.utils.{ImageCropper, ImageTools}
 import models.primitives.{RawImage, Row}
 
 object Application extends Controller {
+
+
+
 
   def index = Action {
     Ok(views.html.index(null))
@@ -77,7 +81,7 @@ object Application extends Controller {
   }
 
   private def getTextFromImage(imageByteArray: Array[Byte], parsedDocument: Document): String = {
-    val textBuilder = TextBuilder(imageByteArray, parsedDocument, Play.getFile("conf/resources").getAbsolutePath)
+    val textBuilder = TextBuilder(imageByteArray, parsedDocument, Play.getFile("conf/resources").getPath)
     val text = textBuilder.getText
     val sb = new StringBuilder
     text foreach {
