@@ -10,8 +10,7 @@ import net.sourceforge.tess4j.{ITesseract, Tesseract, Tesseract1}
   */
 class FeatureDetector(dataPath: String) {
 
-  //val instance: ITesseract = new Tesseract()
-  val instance: Tesseract1 = new Tesseract1()
+  val instance: ITesseract = new Tesseract()
 
   instance.setDatapath(dataPath)
   instance.setLanguage("eng")
