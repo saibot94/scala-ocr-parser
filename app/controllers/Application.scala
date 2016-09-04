@@ -9,10 +9,8 @@ import play.api.mvc._
 import play.api.cache.Cache
 import play.api.Play.current
 import play.api.db._
-import javax.measure.unit.SI.KILOGRAM
 
-import models.config.AppConfig
-import models.ocr.{BoundingBoxDrawer, OCRService}
+import models.ocr.{BoundingBoxDrawer, OCRService, FeatureDetector}
 import models.utils.{ImageCropper, ImageTools}
 import models.primitives.{RawImage, Row}
 
@@ -59,7 +57,10 @@ object Application extends Controller {
           val rowsAndBoxes = (new OCRService).identifyLinesAndCharacters(rawImage)
           val boundingBoxImage = getBoundingBoxImage(imageByteArray, rowsAndBoxes)
           val croppedCharacters = ImageCropper.cropImage(imageByteArray, rowsAndBoxes.head.characterBoundingBoxes)
+          val detector = FeatureDetector.apply
+          val features = detector.detectFeatures(croppedCharacters.head)
 
+          println(s"features: $features")
           val outputStream = new ByteArrayOutputStream()
           ImageIO.write(croppedCharacters.head, "jpeg", outputStream)
 
