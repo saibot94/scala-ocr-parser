@@ -20,8 +20,6 @@ import models.primitives.{RawImage, Row}
 object Application extends Controller {
 
 
-
-
   def index = Action {
     Ok(views.html.index(null))
   }
@@ -81,7 +79,9 @@ object Application extends Controller {
   }
 
   private def getTextFromImage(imageByteArray: Array[Byte], parsedDocument: Document): String = {
-    val textBuilder = TextBuilder(imageByteArray, parsedDocument, Play.getFile("resources").getCanonicalPath)
+    val modelFilePath = Play.getFile("resources").getCanonicalPath
+    println(s"[log] Model file path is: $modelFilePath")
+    val textBuilder = TextBuilder(imageByteArray, parsedDocument, modelFilePath)
     val text = textBuilder.getText
     val sb = new StringBuilder
     text foreach {
