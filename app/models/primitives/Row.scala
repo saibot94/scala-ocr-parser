@@ -5,22 +5,9 @@ import models.config.AppConfig
 /**
   * Created by darkg on 02-Sep-16.
   */
-class Row(val characterBoundingBoxes: List[BoundingBox]) {
-
+class Row(override val boundingBoxes: List[BoundingBox]) extends ObjectWithBoundingBox(boundingBoxes) {
   var rowBoundingBox: Option[BoundingBox] = computeSelfBoundingBox
 
-  private def computeSelfBoundingBox: Option[BoundingBox] = {
-    if (characterBoundingBoxes.nonEmpty) {
-      val firstBox = characterBoundingBoxes.head
-      val lastBox = characterBoundingBoxes.last
-      Some(BoundingBox(firstBox.leftUpX,
-        firstBox.leftUpY,
-        lastBox.lowerRightX,
-        lastBox.lowerRightY))
-    } else {
-      None
-    }
-  }
 }
 
 object Row {

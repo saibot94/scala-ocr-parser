@@ -6,6 +6,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import javax.imageio.ImageIO
 
 import models.config.AppConfig
+import models.document.{Document, ParsedRow, ParsedWord}
 import models.primitives.{BoundingBox, Row}
 import models.utils.ImageTools
 
@@ -13,38 +14,57 @@ import models.utils.ImageTools
   * Created by darkg on 03-Sep-16.
   */
 class BoundingBoxDrawer(imageBytes: Array[Byte]) {
-  def getBoundingBoxesImage(rowList: List[Row]): ByteArrayOutputStream = {
+  def getBoundingBoxesImage(document: Document): ByteArrayOutputStream = {
     val inputStream = new ByteArrayInputStream(this.imageBytes)
     val bufferedImageConverted = ImageIO.read(inputStream)
     val outputStream = new ByteArrayOutputStream()
     if (bufferedImageConverted != null) {
       val colorImage = ImageTools.createNewImageType(bufferedImageConverted, BufferedImage.TYPE_INT_RGB)
-      this.drawingProcedure(colorImage, rowList)
+      this.drawingProcedure(colorImage, document)
       ImageIO.write(colorImage, "jpeg", outputStream)
     }
 
     outputStream
   }
 
-  private def drawingProcedure(image: BufferedImage,
-                               rowList: List[Row]): BufferedImage = {
-    val graphics = image.createGraphics()
+  private def drawWordBoundingBox(wordBoundingBox: BoundingBox, graphics: Graphics2D): Unit = {
+    graphics.setColor(java.awt.Color.GREEN)
+    graphics.drawRect(wordBoundingBox.leftUpX,
+      wordBoundingBox.leftUpY,
+      wordBoundingBox.lowerRightX - wordBoundingBox.leftUpX,
+      wordBoundingBox.lowerRightY - wordBoundingBox.leftUpY)
+  }
 
-    val extra = AppConfig.boundingBoxExtraSpace
+  private def drawCharacter(character: BoundingBox, graphics: Graphics2D): Unit = {
+    graphics.drawRect(character.leftUpX,
+      character.leftUpY,
+      character.lowerRightX - character.leftUpX,
+      character.lowerRightY - character.leftUpY)
+  }
+
+  private def drawWord(word: ParsedWord, graphics: Graphics2D): Unit = {
+    if (word.wordBoundingBox.isDefined) {
+      drawWordBoundingBox(word.wordBoundingBox.get, graphics)
+    }
+    graphics.setColor(java.awt.Color.RED)
+    //word.boundingBoxes.foreach(character => drawCharacter(character, graphics))
+
+  }
+
+  private def drawRow(row: ParsedRow, graphics: Graphics2D): Unit = {
+    row.words.foreach(word => drawWord(word, graphics))
+    // Draw Row bounding box
     var i = 0
-    rowList.foreach(
-      row => {
-        graphics.setColor(java.awt.Color.RED)
-        row.characterBoundingBoxes.foreach(
-          box =>
-            graphics.drawRect(box.leftUpX, box.leftUpY, box.lowerRightX - box.leftUpX, box.lowerRightY - box.leftUpY)
-        )
-        // Draw Row bounding box
-        if (row.rowBoundingBox.isDefined) {
-          drawRowBoundingBox(graphics, row.rowBoundingBox.get, i)
-          i += 1
-        }
-      })
+    if (row.boundingBox.isDefined) {
+     // drawRowBoundingBox(graphics, row.boundingBox.get, i)
+      i += 1
+    }
+  }
+
+  private def drawingProcedure(image: BufferedImage,
+                               document: Document): BufferedImage = {
+    val graphics = image.createGraphics()
+    document.rows.foreach(row => drawRow(row, graphics))
     image
   }
 

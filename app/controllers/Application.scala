@@ -4,13 +4,13 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 
+import models.document.{Document, DocumentParser}
 import play.api._
 import play.api.mvc._
 import play.api.cache.Cache
 import play.api.Play.current
 import play.api.db._
-
-import models.ocr.{BoundingBoxDrawer, OCRService, FeatureDetector}
+import models.ocr.{BoundingBoxDrawer, FeatureDetector, OCRService}
 import models.utils.{ImageCropper, ImageTools}
 import models.primitives.{RawImage, Row}
 
@@ -54,11 +54,14 @@ object Application extends Controller {
           println(s"[log] After conversion to byte array, the dimensions are as follows: ${rawImage.data.length}")
           println(s"[log] Width: ${rawImage.width}; Height: ${rawImage.height}")
           //checkPositives(rawImage)
-          val rowsAndBoxes = (new OCRService).identifyLinesAndCharacters(rawImage)
-          val boundingBoxImage = getBoundingBoxImage(imageByteArray, rowsAndBoxes)
-          val croppedCharacters = ImageCropper.cropImage(imageByteArray, rowsAndBoxes.head.characterBoundingBoxes)
-          val detector = FeatureDetector.apply
-          croppedCharacters.foreach(character => detector.detectFeatures(character))
+          val rows = OCRService().identifyLinesAndCharacters(rawImage)
+          val parsedDocument = DocumentParser.parseImageToDocument(rows)
+          val boundingBoxImage = getBoundingBoxImage(imageByteArray, parsedDocument)
+
+
+          val croppedCharacters = ImageCropper.cropImage(imageByteArray, rows.head.boundingBoxes)
+          //val detector = FeatureDetector(Play.getFile("conf/resources").getAbsolutePath)
+          //croppedCharacters.foreach(character => detector.detectFeatures(character))
 
 
           val outputStream = new ByteArrayOutputStream()
@@ -66,42 +69,43 @@ object Application extends Controller {
 
           Ok(
             boundingBoxImage.toByteArray
+            //outputStream.toByteArray
           ).as(contentType.getOrElse("image/jpeg"))
       }.getOrElse {
         Redirect(routes.Application.index).flashing("error" -> "Missing file")
       }
   }
 
-  private def getBoundingBoxImage(imageBytes: Array[Byte], rowsAndBoxes: List[Row]): ByteArrayOutputStream = {
+  private def getBoundingBoxImage(imageBytes: Array[Byte], document: Document): ByteArrayOutputStream = {
     //printBoundingBoxes(rowsAndBoxes)
-    BoundingBoxDrawer(imageBytes).getBoundingBoxesImage(rowsAndBoxes)
+    BoundingBoxDrawer(imageBytes).getBoundingBoxesImage(document)
   }
 
-  private def printBoundingBoxes(rowsAndBoxes: List[Row]): Unit = {
-    println(s"${rowsAndBoxes.length} rows found")
-    rowsAndBoxes.foreach(
-      row =>
-        row.characterBoundingBoxes.foreach(
-          box =>
-            println(s"box: ${box.leftUpX}, ${box.leftUpY}, ${box.lowerRightX}, ${box.lowerRightY}")
+  //  private def printBoundingBoxes(rowsAndBoxes: List[Row]): Unit = {
+  //    println(s"${rowsAndBoxes.length} rows found")
+  //    rowsAndBoxes.foreach(
+  //      row =>
+  //        row.characterBoundingBoxes.foreach(
+  //          box =>
+  //            println(s"box: ${box.leftUpX}, ${box.leftUpY}, ${box.lowerRightX}, ${box.lowerRightY}")
+  //
+  //        )
+  //    )
+  //  }
 
-        )
-    )
-  }
-
-  private def checkPositives(rawImage: RawImage): Unit = {
-    println(s"[log] Checking where characters may exist: ")
-    var c = 0
-    for (i <- rawImage.data.indices) {
-      for (j <- rawImage.data(i).indices) {
-        if (rawImage.data(i)(j) == 0) {
-          println(s"found on pos: $i,$j, value: ${rawImage.data(i)(j)}; ${rawImage.data(i)(j)};")
-          c += 1
-          if (c == 100) {
-            return
-          }
-        }
-      }
-    }
-  }
+  //  private def checkPositives(rawImage: RawImage): Unit = {
+  //    println(s"[log] Checking where characters may exist: ")
+  //    var c = 0
+  //    for (i <- rawImage.data.indices) {
+  //      for (j <- rawImage.data(i).indices) {
+  //        if (rawImage.data(i)(j) == 0) {
+  //          println(s"found on pos: $i,$j, value: ${rawImage.data(i)(j)}; ${rawImage.data(i)(j)};")
+  //          c += 1
+  //          if (c == 100) {
+  //            return
+  //          }
+  //        }
+  //      }
+  //    }
+  //  }
 }

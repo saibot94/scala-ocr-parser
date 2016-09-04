@@ -13,7 +13,7 @@ libraryDependencies ++= Seq(
   ws,
   "net.imagej" % "ij" % "1.49c",
   "log4j" % "log4j" % "1.2.17",
-"de.lmu.ifi.dbs.jfeaturelib" % "JFeatureLib" % "1.6.3" from "https://oss.sonatype.org/content/repositories/releases/de/lmu/ifi/dbs/jfeaturelib/JFeatureLib/1.6.3/JFeatureLib-1.6.3.jar",
+  "net.sourceforge.tess4j" % "tess4j" % "3.2.1",
   "org.boofcv" % "core" % "0.24.1"
 )
 

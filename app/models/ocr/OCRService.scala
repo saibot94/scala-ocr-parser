@@ -9,7 +9,7 @@ import scala.collection.mutable.ListBuffer
 /**
   * Created by darkg on 02-Sep-16.
   */
-class OCRService {
+case class OCRService() {
 
   def identifyLinesAndCharacters(image: RawImage): List[Row] = {
     var resultRows = new ListBuffer[Row]
@@ -58,22 +58,20 @@ class OCRService {
           }
           k -= 1
         }
-        resultList += BoundingBox.createFitBoundingBox(
-          imageRow(i).length,
-          imageRow.length,
-          minX.get - (extra * 2),
-          minY.get - extra,
-          maxX.get + (extra * 2),
-          maxYp + extra
-        )
+        if ((maxX.get - minX.get > 0) && (maxYp - minY.get > 0)) {
+          resultList += BoundingBox.createFitBoundingBox(
+            imageRow(i).length,
+            imageRow.length,
+            minX.get - (extra * 2),
+            minY.get - extra,
+            maxX.get + (extra * 2),
+            maxYp + extra
+          )
+        }
         minX = None
       }
     }
     resultList
   }
 
-}
-
-object OCRService {
-  def apply: OCRService = new OCRService()
 }

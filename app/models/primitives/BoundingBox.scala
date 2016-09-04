@@ -17,5 +17,7 @@ object BoundingBox {
       ArrayOps.fitInArray(height, leftUpY),
       ArrayOps.fitInArray(width, lowerRightX),
       ArrayOps.fitInArray(height, lowerRightY))
+
   }
+
 }

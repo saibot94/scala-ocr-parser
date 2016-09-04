@@ -1,6 +1,6 @@
 package models.utils
 
-import java.awt.{Graphics2D, Image}
+import java.awt.{Graphics2D, Image, RenderingHints}
 import java.awt.image._
 import java.io.{ByteArrayOutputStream, File}
 import javax.imageio.ImageIO
@@ -26,9 +26,13 @@ object ImageTools {
 
   def preprocessImage(image: File,
                       imageFormat: String = "jpeg",
-                      brightenFactor: Float = AppConfig.blackAndWhiteFactor): (ByteArrayOutputStream, RawImage) = {
+                      brightenFactor: Float = AppConfig.blackAndWhiteFactor,
+                      brightenOffset: Float = AppConfig.brightenOffset): (ByteArrayOutputStream, RawImage) = {
     // Pre-process image
-    val preprocessedImage = convolutionOp(brightenAndIncreaseContrast(ImageIO.read(image), brightenFactor))
+    val preprocessedImage = brightenAndIncreaseContrast(
+      convolutionOp(ImageIO.read(image)),
+      brightenFactor,
+      brightenOffset)
     // Next resize the image
     val resizedPreprocessedImage = resizeImage(AppConfig.xScaleSize, AppConfig.yScaleSize, preprocessedImage)
     // Create b&w image
@@ -41,8 +45,8 @@ object ImageTools {
   }
 
 
-  private def brightenAndIncreaseContrast(img: BufferedImage, brightenFactor: Float): BufferedImage = {
-    val rescale = new RescaleOp(brightenFactor, 1.5f, null)
+  private def brightenAndIncreaseContrast(img: BufferedImage, brightenFactor: Float, offset: Float): BufferedImage = {
+    val rescale = new RescaleOp(brightenFactor, offset, null)
     rescale.filter(img, img)
   }
 
