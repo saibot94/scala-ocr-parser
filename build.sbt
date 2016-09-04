@@ -13,8 +13,7 @@ libraryDependencies ++= Seq(
   ws,
   "net.imagej" % "ij" % "1.49c",
   "log4j" % "log4j" % "1.2.17",
-  "net.sourceforge.tess4j" % "tess4j" % "3.2.1",
-  "org.boofcv" % "core" % "0.24.1"
+  "net.sourceforge.tess4j" % "tess4j" % "3.2.1"
 )
 
 libraryDependencies <+= scalaVersion("org.scala-lang" % "scala-compiler" % _)
