@@ -13,7 +13,8 @@ libraryDependencies ++= Seq(
   ws,
   "net.imagej" % "ij" % "1.49c",
   "log4j" % "log4j" % "1.2.17",
-"de.lmu.ifi.dbs.jfeaturelib" % "JFeatureLib" % "1.6.3" from "https://oss.sonatype.org/content/repositories/releases/de/lmu/ifi/dbs/jfeaturelib/JFeatureLib/1.6.3/JFeatureLib-1.6.3.jar"
+"de.lmu.ifi.dbs.jfeaturelib" % "JFeatureLib" % "1.6.3" from "https://oss.sonatype.org/content/repositories/releases/de/lmu/ifi/dbs/jfeaturelib/JFeatureLib/1.6.3/JFeatureLib-1.6.3.jar",
+  "org.boofcv" % "core" % "0.24.1"
 )
 
 libraryDependencies <+= scalaVersion("org.scala-lang" % "scala-compiler" % _)

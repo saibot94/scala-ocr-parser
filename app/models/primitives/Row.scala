@@ -11,13 +11,12 @@ class Row(val characterBoundingBoxes: List[BoundingBox]) {
 
   private def computeSelfBoundingBox: Option[BoundingBox] = {
     if (characterBoundingBoxes.nonEmpty) {
-      val offset = AppConfig.boundingBoxExtraSpace
       val firstBox = characterBoundingBoxes.head
       val lastBox = characterBoundingBoxes.last
-      Some(BoundingBox(firstBox.leftUpX - offset,
-        firstBox.leftUpY - offset,
-        lastBox.lowerRightX + offset,
-        lastBox.lowerRightY + offset))
+      Some(BoundingBox(firstBox.leftUpX,
+        firstBox.leftUpY,
+        lastBox.lowerRightX,
+        lastBox.lowerRightY))
     } else {
       None
     }

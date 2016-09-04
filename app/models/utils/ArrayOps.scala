@@ -48,4 +48,11 @@ object ArrayOps {
     }
     sum
   }
+
+  def fitInArray(len: Int, coord: Int): Int = {
+    if (coord < 0) 0
+    else if (coord > (len - 1)) len - 1
+    else coord
+  }
 }
+

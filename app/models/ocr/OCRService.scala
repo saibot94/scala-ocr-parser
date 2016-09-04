@@ -38,6 +38,7 @@ class OCRService {
     var resultList = new ListBuffer[BoundingBox]()
     var maxX: Option[Int] = None
     var minX: Option[Int] = None
+    val extra = AppConfig.boundingBoxExtraSpace
     for (j <- imageRow(i).indices) {
       if (ArrayOps.efficientColSum(imageRow, j, minY.get, maxY.get) >= AppConfig.colDetectionPixelThreshold) {
         maxX = Some(j)
@@ -57,7 +58,14 @@ class OCRService {
           }
           k -= 1
         }
-        resultList += BoundingBox(minX.get, minY.get, maxX.get, maxYp)
+        resultList += BoundingBox.createFitBoundingBox(
+          imageRow(i).length,
+          imageRow.length,
+          minX.get - (extra * 2),
+          minY.get - extra,
+          maxX.get + (extra * 2),
+          maxYp + extra
+        )
         minX = None
       }
     }

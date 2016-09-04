@@ -58,9 +58,9 @@ object Application extends Controller {
           val boundingBoxImage = getBoundingBoxImage(imageByteArray, rowsAndBoxes)
           val croppedCharacters = ImageCropper.cropImage(imageByteArray, rowsAndBoxes.head.characterBoundingBoxes)
           val detector = FeatureDetector.apply
-          val features = detector.detectFeatures(croppedCharacters.head)
+          croppedCharacters.foreach(character => detector.detectFeatures(character))
 
-          println(s"features: $features")
+
           val outputStream = new ByteArrayOutputStream()
           ImageIO.write(croppedCharacters.head, "jpeg", outputStream)
 

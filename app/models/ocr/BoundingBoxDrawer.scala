@@ -37,7 +37,7 @@ class BoundingBoxDrawer(imageBytes: Array[Byte]) {
         graphics.setColor(java.awt.Color.RED)
         row.characterBoundingBoxes.foreach(
           box =>
-            graphics.drawRect(box.leftUpX - extra, box.leftUpY - extra, box.lowerRightX - box.leftUpX + extra, box.lowerRightY - box.leftUpY + extra)
+            graphics.drawRect(box.leftUpX, box.leftUpY, box.lowerRightX - box.leftUpX, box.lowerRightY - box.leftUpY)
         )
         // Draw Row bounding box
         if (row.rowBoundingBox.isDefined) {
@@ -50,7 +50,7 @@ class BoundingBoxDrawer(imageBytes: Array[Byte]) {
 
   private def drawRowBoundingBox(graphics: Graphics2D, rowBB: BoundingBox, rowNum: Int): Unit = {
     graphics.setColor(java.awt.Color.BLUE)
-    graphics.drawString(s"Row $rowNum", rowBB.leftUpX - 5, rowBB.leftUpY - 5)
+    graphics.drawString(s"Row $rowNum", rowBB.leftUpX + 5, rowBB.leftUpY - 5)
     graphics.drawRect(rowBB.leftUpX,
       rowBB.leftUpY,
       rowBB.lowerRightX - rowBB.leftUpX,
