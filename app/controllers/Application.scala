@@ -4,12 +4,12 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 
+import models.config.AppConfig
 import models.document.{Document, DocumentParser}
 import play.api._
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.Environment
-
 import play.api.cache.Cache
 import play.api.Play.current
 import play.api.db._
@@ -79,7 +79,7 @@ object Application extends Controller {
   }
 
   private def getTextFromImage(imageByteArray: Array[Byte], parsedDocument: Document): String = {
-    val modelFilePath = Play.getFile("resources").getCanonicalPath
+    val modelFilePath = Play.getFile(AppConfig.resourcesFolder).getCanonicalPath
     println(s"[log] Model file path is: $modelFilePath")
     val textBuilder = TextBuilder(imageByteArray, parsedDocument, modelFilePath)
     val text = textBuilder.getText

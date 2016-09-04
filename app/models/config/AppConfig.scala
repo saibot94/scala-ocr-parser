@@ -13,6 +13,7 @@ object AppConfig {
   val energy = scala.util.Properties.envOrElse("ENERGY", "12 GeV")
   val boundingBoxExtraSpace = scala.util.Properties.envOrElse("BOUNDING_BOX_EXTRA_SPACE", "2").toInt
   val wordDetectPixelLimit = scala.util.Properties.envOrElse("WORD_DETECT_LIMIT", "5").toInt
+  val resourcesFolder = scala.util.Properties.envOrElse("RESOURCE_FOLDER", "resources")
 
 
 }
