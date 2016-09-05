@@ -61,6 +61,11 @@ or
 
 [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
+## Configuration
+
+The application can be configured with the values set in the __models.config.AppConfig__ class.
+The configurations are pretty self-explanatory.
+
 ## Documentation
 
 For more information about using Play and Scala on Heroku, see these Dev Center articles:

@@ -22,7 +22,7 @@ object Application extends Controller {
 
 
   def index = Action {
-    Ok(views.html.index(null))
+    Ok(views.html.index(null, null))
   }
 
   def db = Action {
@@ -52,7 +52,8 @@ object Application extends Controller {
     val drawChars = urlForm.get("drawchar").map(_.head).getOrElse("false").toBoolean
     val drawWords = urlForm.get("drawword").map(_.head).getOrElse("false").toBoolean
     val drawRows = urlForm.get("drawrow").map(_.head).getOrElse("false").toBoolean
-    DrawingOptions(drawChars, drawWords, drawRows)
+    val renderContent = urlForm.get("renderContent").map(_.head).orNull
+    DrawingOptions(drawChars, drawWords, drawRows, renderContent)
   }
 
   def upload = Action(parse.multipartFormData) {
@@ -68,7 +69,7 @@ object Application extends Controller {
 
           println(s"[log] After conversion to byte array, the dimensions are as follows: ${rawImage.data.length}")
           println(s"[log] Width: ${rawImage.width}; Height: ${rawImage.height}")
-          println(s"[log] Drawing config: chars: ${drawingOptions.drawChars}; words: ${drawingOptions.drawWords}; rows: ${drawingOptions.drawRows}")
+          println(s"[log] Drawing config: drawchar: ${drawingOptions.drawChars}; drawword: ${drawingOptions.drawWords}; drawrow: ${drawingOptions.drawRows}, renderContent: ${drawingOptions.renderContent}")
 
 
           val parsedDocument = getDocumentFromRawImage(rawImage)
@@ -76,14 +77,25 @@ object Application extends Controller {
           val text = getTextFromImage(imageByteArray, parsedDocument)
           println("[log] Done parsing text")
           println(s"[log] The resulting text is: ${System.lineSeparator()} $text")
-          val jsResult: JsValue = JsObject(Seq(
-            "text" -> JsString(text),
-            "image" -> JsString(ImageTools.imageToBase64(boundingBoxImage.toByteArray))
-          ))
-          Ok(jsResult)
+
+          getResult(drawingOptions, boundingBoxImage, text)
       }.getOrElse {
         Redirect(routes.Application.index).flashing("error" -> "Missing file")
       }
+  }
+
+  def getResult(drawingOptions: DrawingOptions, boundingBoxImage: ByteArrayOutputStream, text: String): Result = {
+    val base64Image = ImageTools.imageToBase64(boundingBoxImage.toByteArray)
+    if (drawingOptions.renderContent == null) {
+      val jsResult: JsValue = JsObject(Seq(
+        "text" -> JsString(text),
+        "image" -> JsString(base64Image)
+      ))
+      Ok(jsResult)
+    }
+    else {
+      Ok(views.html.index(text, base64Image))
+    }
   }
 
   private def getBoundingBoxImage(imageBytes: Array[Byte], document: Document, drawingOptions: DrawingOptions): ByteArrayOutputStream = {

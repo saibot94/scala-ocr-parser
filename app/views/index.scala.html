@@ -1,4 +1,4 @@
-@(message: String)
+@(text : String, imageBytes: String)
 
 @main("OCR") {
 
@@ -13,6 +13,21 @@
     </div>
 </div>
 <div class="container">
+    @if(imageBytes != null){
+    <div class="alert alert-success text-center" role="alert">
+        Image OCR successful! You can see your results below
+    </div>
+    <div class="jumbotron text-center">
+        <h3>Text obtained</h3>
+
+        <p style="color: rgb(217, 204, 238);font-size: 14px;">@text</p>
+        <hr>
+        <h3>Processed image </h3>
+        <img style="max-width:95%" src="data:image/jpeg;base64,@imageBytes" alt="Result">
+    </div>
+    <h3>Upload another image</h3>
+    }
+
     @helper.form(action = routes.Application.upload, 'enctype -> "multipart/form-data") {
     <div class="form-group">
         <label for="exampleInputFile">Image input</label>
@@ -30,17 +45,15 @@
         <div class="checkbox">
             <label><input type="checkbox" name="drawrow" value="true">Draw row bounding boxes</label>
         </div>
+        <hr>
+        <div class="checkbox">
+            <label><input type="checkbox" name="renderContent" value="true">Render content back in page?</label>
+        </div>
     </div>
-    <hr>
     <div class="form-group">
         <button class="btn btn-primary" type="submit">Upload image</button>
     </div>
 
-    }
-    @if(message != null){
-    <div class="alert alert-success text-center" role="alert">
-        @message
-    </div>
     }
 
     <div class="alert alert-info text-center" role="alert">
