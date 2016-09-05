@@ -15,5 +15,4 @@ object AppConfig {
   val wordDetectPixelLimit = scala.util.Properties.envOrElse("WORD_DETECT_LIMIT", "5").toInt
   val resourcesFolder = scala.util.Properties.envOrElse("RESOURCE_FOLDER", "resources")
 
-
 }
