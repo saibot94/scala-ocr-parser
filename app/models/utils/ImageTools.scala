@@ -32,7 +32,7 @@ object ImageTools {
                       brightenOffset: Float = AppConfig.brightenOffset): (ByteArrayOutputStream, RawImage) = {
     // Pre-process image
     val preprocessedImage = brightenAndIncreaseContrast(
-      ImageIO.read(image),
+      convolutionOp(ImageIO.read(image)),
       brightenFactor,
       brightenOffset)
     // Next resize the image
@@ -54,9 +54,9 @@ object ImageTools {
 
   private def convolutionOp(img: BufferedImage): BufferedImage = {
     val blur: Array[Float] = Array[Float](
-      0.0f, 0.1f, 0.0f,
-      0.1f, 0.6f, 0.1f,
-      0.0f, 0.6f, 0.0f)
+      0.0f, 0.01f, 0.0f,
+      0.01f, 0.03f, 0.01f,
+      0.0f, 0.03f, 0.0f)
     val kernel = new java.awt.image.Kernel(3, 3, blur)
     val convolution = new ConvolveOp(kernel)
     convolution.filter(img, null)
