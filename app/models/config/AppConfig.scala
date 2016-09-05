@@ -14,5 +14,5 @@ object AppConfig {
   val boundingBoxExtraSpace = scala.util.Properties.envOrElse("BOUNDING_BOX_EXTRA_SPACE", "2").toInt
   val wordDetectPixelLimit = scala.util.Properties.envOrElse("WORD_DETECT_LIMIT", "5").toInt
   val resourcesFolder = scala.util.Properties.envOrElse("RESOURCE_FOLDER", "resources")
-
+  val useCommandLineTesseract = scala.util.Properties.envOrElse("USE_COMMAND_LINE_TESSERACT", "false").toBoolean
 }

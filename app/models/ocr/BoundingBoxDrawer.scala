@@ -5,9 +5,8 @@ import java.awt.image.BufferedImage
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import javax.imageio.ImageIO
 
-import models.config.AppConfig
 import models.document.{Document, ParsedRow, ParsedWord}
-import models.primitives.{BoundingBox, Row}
+import models.primitives.BoundingBox
 import models.utils.ImageTools
 
 /**
