@@ -14,8 +14,9 @@ import play.api.cache.Cache
 import play.api.Play.current
 import play.api.db._
 import models.ocr.{BoundingBoxDrawer, FeatureDetector, OCRService, TextBuilder}
-import models.utils.{ImageCropper, ImageTools}
+import models.utils.{DrawingOptions, ImageCropper, ImageTools}
 import models.primitives.{RawImage, Row}
+import play.api.libs.Files.TemporaryFile
 
 object Application extends Controller {
 
@@ -46,20 +47,32 @@ object Application extends Controller {
   }
 
 
+  def getDrawingOptions(request: Request[MultipartFormData[TemporaryFile]]): DrawingOptions = {
+    val urlForm = request.body.asFormUrlEncoded
+    val drawChars = urlForm.get("drawchar").map(_.head).getOrElse("false").toBoolean
+    val drawWords = urlForm.get("drawword").map(_.head).getOrElse("false").toBoolean
+    val drawRows = urlForm.get("drawrow").map(_.head).getOrElse("false").toBoolean
+    DrawingOptions(drawChars, drawWords, drawRows)
+  }
+
   def upload = Action(parse.multipartFormData) {
     request =>
       request.body.file("picture").map {
         picture =>
-          val contentType = picture.contentType
+          val drawingOptions = getDrawingOptions(request)
+
+
           val conversionResult = ImageTools.preprocessImage(picture.ref.file)
           val imageByteArray = conversionResult._1.toByteArray
           val rawImage: RawImage = conversionResult._2
 
           println(s"[log] After conversion to byte array, the dimensions are as follows: ${rawImage.data.length}")
           println(s"[log] Width: ${rawImage.width}; Height: ${rawImage.height}")
-          //checkPositives(rawImage)
+          println(s"[log] Drawing config: chars: ${drawingOptions.drawChars}; words: ${drawingOptions.drawWords}; rows: ${drawingOptions.drawRows}")
+
+
           val parsedDocument = getDocumentFromRawImage(rawImage)
-          val boundingBoxImage = getBoundingBoxImage(imageByteArray, parsedDocument)
+          val boundingBoxImage = getBoundingBoxImage(imageByteArray, parsedDocument, drawingOptions)
           val text = getTextFromImage(imageByteArray, parsedDocument)
           println("[log] Done parsing text")
           println(s"[log] The resulting text is: ${System.lineSeparator()} $text")
@@ -73,9 +86,9 @@ object Application extends Controller {
       }
   }
 
-  private def getBoundingBoxImage(imageBytes: Array[Byte], document: Document): ByteArrayOutputStream = {
+  private def getBoundingBoxImage(imageBytes: Array[Byte], document: Document, drawingOptions: DrawingOptions): ByteArrayOutputStream = {
     //printBoundingBoxes(rowsAndBoxes)
-    BoundingBoxDrawer(imageBytes).getBoundingBoxesImage(document)
+    BoundingBoxDrawer(imageBytes, drawingOptions).getBoundingBoxesImage(document)
   }
 
   private def getTextFromImage(imageByteArray: Array[Byte], parsedDocument: Document): String = {
