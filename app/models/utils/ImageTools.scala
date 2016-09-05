@@ -32,7 +32,7 @@ object ImageTools {
                       brightenOffset: Float = AppConfig.brightenOffset): (ByteArrayOutputStream, RawImage) = {
     // Pre-process image
     val preprocessedImage = brightenAndIncreaseContrast(
-      convolutionOp(ImageIO.read(image)),
+      ImageIO.read(image),
       brightenFactor,
       brightenOffset)
     // Next resize the image
