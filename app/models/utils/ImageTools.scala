@@ -48,18 +48,26 @@ object ImageTools {
 
 
   private def brightenAndIncreaseContrast(img: BufferedImage, brightenFactor: Float, offset: Float): BufferedImage = {
-    val rescale = new RescaleOp(brightenFactor, offset, null)
-    rescale.filter(img, img)
+    //if (AppConfig.preprocessImage) {
+      val rescale = new RescaleOp(brightenFactor, offset, null)
+      rescale.filter(img, img)
+//    } else {
+//      img
+//    }
   }
 
   private def convolutionOp(img: BufferedImage): BufferedImage = {
-    val blur: Array[Float] = Array[Float](
-      0.0f, 0.1f, 0.0f,
-      0.1f, 0.3f, 0.1f,
-      0.0f, 0.3f, 0.0f)
-    val kernel = new java.awt.image.Kernel(3, 3, blur)
-    val convolution = new ConvolveOp(kernel)
-    convolution.filter(img, null)
+    if (AppConfig.preprocessImage) {
+      val blur: Array[Float] = Array[Float](
+        1f / 16f, 1f / 8f, 1f / 16f,
+        1f / 8f, 1f / 4f, 1f / 8f,
+        1f / 16f, 1f / 8f, 1f / 16f)
+      val kernel = new java.awt.image.Kernel(3, 3, blur)
+      val convolution = new ConvolveOp(kernel)
+      convolution.filter(img, null)
+    } else {
+      img
+    }
   }
 
   private def extractPixelsFromImage(image: BufferedImage): RawImage = {
@@ -108,7 +116,7 @@ object ImageTools {
     resizedImage
   }
 
-  def imageToBase64(image : Array[Byte]) : String = {
+  def imageToBase64(image: Array[Byte]): String = {
     Base64.getEncoder.encodeToString(image)
   }
 }
