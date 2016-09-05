@@ -17,7 +17,9 @@ class FeatureDetector(dataPath: String) {
 
   val instance: ITesseract = new Tesseract()
   val useCommandLine = AppConfig.useCommandLineTesseract
-
+  if (useCommandLine) {
+    println("[log] Using the command line version of Tesseract")
+  }
   instance.setDatapath(dataPath)
   instance.setLanguage("eng")
 
