@@ -14,7 +14,7 @@ import play.api.cache.Cache
 import play.api.Play.current
 import play.api.db._
 import models.ocr.{BoundingBoxDrawer, FeatureDetector, OCRService, TextBuilder}
-import models.utils.{DrawingOptions, ImageCropper, ImageTools}
+import models.utils.{DrawingOptions, ImageCropper, ImageTools, TimeTools}
 import models.primitives.{RawImage, Row}
 import play.api.libs.Files.TemporaryFile
 
@@ -74,10 +74,10 @@ object Application extends Controller {
 
           val parsedDocument = getDocumentFromRawImage(rawImage)
           val boundingBoxImage = getBoundingBoxImage(imageByteArray, parsedDocument, drawingOptions)
-          val text = getTextFromImage(imageByteArray, parsedDocument)
+          val text = TimeTools.time("Text extraction", {
+            getTextFromImage(imageByteArray, parsedDocument)
+          })
           println("[log] Done parsing text")
-          println(s"[log] The resulting text is: ${System.lineSeparator()} $text")
-
           getResult(drawingOptions, boundingBoxImage, text)
       }.getOrElse {
         Redirect(routes.Application.index).flashing("error" -> "Missing file")

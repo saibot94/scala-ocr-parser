@@ -14,12 +14,11 @@ import ExecutionContext.Implicits.global
   */
 object DocumentParser {
 
-  private def parseRows(rows: List[Row]): List[ParsedRow] = {
-    val rowsFuture = Future.traverse(rows) (
+  private def parseRows(rows: List[Row]): Future[List[ParsedRow]] = {
+    Future.traverse(rows) (
       r =>
         Future(ParsedRow(r.rowBoundingBox, parseWords(r)))
     )
-    Await.result(rowsFuture, Duration.Inf)
   }
 
   private def parseWords(row: Row): List[ParsedWord] = {
@@ -42,7 +41,8 @@ object DocumentParser {
   }
 
   def parseImageToDocument(rawRows: List[Row]): Document = {
-    Document(parseRows(rawRows))
+    val rows = Await.result(parseRows(rawRows), Duration.Inf)
+    Document(rows)
   }
 
 
