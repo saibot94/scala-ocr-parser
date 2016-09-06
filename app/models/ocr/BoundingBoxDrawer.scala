@@ -9,6 +9,10 @@ import models.document.{Document, ParsedRow, ParsedWord}
 import models.primitives.BoundingBox
 import models.utils.{DrawingOptions, ImageTools}
 
+import scala.concurrent._
+import scala.concurrent.duration.Duration
+import ExecutionContext.Implicits.global
+
 /**
   * Created by darkg on 03-Sep-16.
   */
@@ -43,46 +47,49 @@ class BoundingBoxDrawer(imageBytes: Array[Byte], drawingOptions: DrawingOptions)
       wordBoundingBox.lowerRightY - wordBoundingBox.leftUpY)
   }
 
-  private def drawCharacterBoundingBox(character: BoundingBox, graphics: Graphics2D): Unit = {
-    graphics.drawRect(character.leftUpX,
+  private def drawCharacterBoundingBox(character: BoundingBox, graphics: Graphics2D): Future[Unit] = {
+    Future.successful(graphics.drawRect(character.leftUpX,
       character.leftUpY,
       character.lowerRightX - character.leftUpX,
-      character.lowerRightY - character.leftUpY)
+      character.lowerRightY - character.leftUpY))
   }
 
-  private def drawWord(word: ParsedWord, graphics: Graphics2D): Unit = {
+  private def drawWord(word: ParsedWord, graphics: Graphics2D): Future[Any] = {
     if (word.wordBoundingBox.isDefined && drawingOptions.drawWords) {
       drawWordBoundingBox(word.wordBoundingBox.get, graphics)
     }
     if (drawingOptions.drawChars) {
       graphics.setColor(java.awt.Color.RED)
-      word.boundingBoxes.foreach(character => drawCharacterBoundingBox(character, graphics))
+      Future.traverse(word.boundingBoxes) { character => drawCharacterBoundingBox(character, graphics) }
+    }
+    else {
+      Future.successful(List[Unit]())
     }
   }
 
-  private def drawRow(row: ParsedRow, graphics: Graphics2D, rowNum: Int): Unit = {
-    row.words.foreach(word => drawWord(word, graphics))
+  private def drawRow(row: ParsedRow, graphics: Graphics2D, rowNum: Int): Future[Any] = {
     // Draw Row bounding box
     if (row.boundingBox.isDefined && drawingOptions.drawRows) {
       drawRowBoundingBox(graphics, row.boundingBox.get, rowNum)
     }
+    Future.traverse(row.words) { word => drawWord(word, graphics) }
   }
 
   private def drawingProcedure(image: BufferedImage,
                                document: Document): BufferedImage = {
     val graphics = image.createGraphics()
-    var rowNum = 0
-    document.rows.foreach(row => {
-      drawRow(row, graphics, rowNum)
+    var rowNum = -1
+    val fut = Future.traverse(document.rows) { row =>
       rowNum += 1
-    })
-
+      drawRow(row, graphics, rowNum)
+    }
+    Await.result(fut, Duration.Inf)
     image
+
   }
-
 }
 
-object BoundingBoxDrawer {
-  def apply(imageBytes: Array[Byte], drawingOptions: DrawingOptions): BoundingBoxDrawer = new BoundingBoxDrawer(imageBytes, drawingOptions)
-}
+  object BoundingBoxDrawer {
+    def apply(imageBytes: Array[Byte], drawingOptions: DrawingOptions): BoundingBoxDrawer = new BoundingBoxDrawer(imageBytes, drawingOptions)
+  }
 

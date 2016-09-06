@@ -46,21 +46,20 @@ class FeatureDetector(dataPath: String) {
     instance.doOCR(w)
   }
 
-  def detectFeatures(words: List[BufferedImage]): List[String] = {
+  def detectFeatures(words: List[BufferedImage]): Future[List[String]] = {
 
     useCommandLine match {
       case false =>
-        val detectFuture = Future.traverse(words) {
+        Future.traverse(words) {
           w =>
             Future(doSimpleTesseract(w))
         }
-        Await.result(detectFuture, Duration.Inf)
       case true =>
-        val detectFuture = Future.traverse(words) {
+        Future.traverse(words) {
           w =>
             Future(doCommandLineTesseract(w))
         }
-        Await.result(detectFuture, Duration.Inf)
+
     }
   }
 

@@ -19,7 +19,7 @@ class TextBuilder(imageBytes: Array[Byte], document: Document, dataPath: String)
 
   def getText: List[List[String]] = {
     println("[log] Started parsing text from word image croppings")
-    document.rows.map {
+    Await.result(Future.traverse(document.rows) {
       row =>
         val images = row.words.map {
           parsedWord =>
@@ -31,7 +31,7 @@ class TextBuilder(imageBytes: Array[Byte], document: Document, dataPath: String)
             }
         }.filter(img => img.isDefined).map(img => img.get)
         featureDetector.detectFeatures(images)
-    }
+    }, Duration.Inf)
   }
 }
 
