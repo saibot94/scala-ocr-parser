@@ -19,14 +19,10 @@ import ExecutionContext.Implicits.global
   */
 class FeatureDetector(dataPath: String) {
 
-  val instance: ITesseract = new Tesseract()
   val useCommandLine = AppConfig.useCommandLineTesseract
   if (useCommandLine) {
     println("[log] Using the command line version of Tesseract")
   }
-  instance.setDatapath(dataPath)
-  instance.setLanguage("eng")
-
 
   def doCommandLineTesseract(w: BufferedImage): String = {
     val file = File.createTempFile(UUID.randomUUID().toString, ".jpeg")
@@ -41,13 +37,23 @@ class FeatureDetector(dataPath: String) {
     }
   }
 
+  def doSimpleTesseract(w: BufferedImage): String = {
+    val instance: ITesseract = new Tesseract()
+
+    instance.setDatapath(dataPath)
+    instance.setLanguage("eng")
+
+    instance.doOCR(w)
+  }
+
   def detectFeatures(words: List[BufferedImage]): List[String] = {
     useCommandLine match {
       case false =>
-        words.map {
+        val detectFuture = Future.traverse(words) {
           w =>
-            instance.doOCR(w)
+            Future(doSimpleTesseract(w))
         }
+        Await.result(detectFuture, Duration.Inf)
       case true =>
         val detectFuture = Future.traverse(words) {
           w =>

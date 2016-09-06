@@ -5,19 +5,21 @@ import models.primitives.{BoundingBox, Row}
 
 import scala.collection.mutable.ListBuffer
 
+import scala.concurrent._
+import scala.concurrent.duration.Duration
+import ExecutionContext.Implicits.global
+
 /**
   * Created by darkg on 04-Sep-16.
   */
 object DocumentParser {
 
   private def parseRows(rows: List[Row]): List[ParsedRow] = {
-    var result = ListBuffer[ParsedRow]()
-    rows.foreach(
+    val rowsFuture = Future.traverse(rows) (
       r =>
-        result += ParsedRow(r.rowBoundingBox, parseWords(r))
+        Future(ParsedRow(r.rowBoundingBox, parseWords(r)))
     )
-
-    result.toList
+    Await.result(rowsFuture, Duration.Inf)
   }
 
   private def parseWords(row: Row): List[ParsedWord] = {
