@@ -6,8 +6,8 @@ package models.config
 object AppConfig {
   val rowDetectionPixelThreshold = scala.util.Properties.envOrElse("PIXEL_ROW_DETECT_THRESHOLD", "3").toInt
   val colDetectionPixelThreshold = scala.util.Properties.envOrElse("PIXEL_COL_DETECT_THRESHOLD", "3").toInt
-  val xScaleSize = scala.util.Properties.envOrElse("XSCALE_RESIZE", "1920").toInt
-  val yScaleSize = scala.util.Properties.envOrElse("YSCALE_RESIZE", "1080").toInt
+  val xScaleSize = scala.util.Properties.envOrElse("XSCALE_RESIZE", "1024").toInt
+  val yScaleSize = scala.util.Properties.envOrElse("YSCALE_RESIZE", "768").toInt
   val blackAndWhiteFactor = scala.util.Properties.envOrElse("BW_FACTOR", "1.3").toFloat
   val brightenOffset = scala.util.Properties.envOrElse("BRIGHTEN_OFFSET", "1.0").toFloat
   val energy = scala.util.Properties.envOrElse("ENERGY", "12 GeV")
