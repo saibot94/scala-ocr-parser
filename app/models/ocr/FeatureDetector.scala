@@ -7,7 +7,7 @@ import java.util.UUID
 import javax.imageio.ImageIO
 
 import models.config.AppConfig
-import net.sourceforge.tess4j.{ITesseract, Tesseract}
+import net.sourceforge.tess4j.{ITesseract, Tesseract, Tesseract1}
 
 
 import scala.concurrent._
@@ -38,7 +38,7 @@ class FeatureDetector(dataPath: String) {
   }
 
   def doSimpleTesseract(w: BufferedImage): String = {
-    val instance: ITesseract = new Tesseract()
+    val instance: ITesseract = new Tesseract1()
 
     instance.setDatapath(dataPath)
     instance.setLanguage("eng")
@@ -47,6 +47,7 @@ class FeatureDetector(dataPath: String) {
   }
 
   def detectFeatures(words: List[BufferedImage]): List[String] = {
+
     useCommandLine match {
       case false =>
         val detectFuture = Future.traverse(words) {

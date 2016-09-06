@@ -19,21 +19,19 @@ class TextBuilder(imageBytes: Array[Byte], document: Document, dataPath: String)
 
   def getText: List[List[String]] = {
     println("[log] Started parsing text from word image croppings")
-    val documentFuture = Future.traverse(document.rows) {
+    document.rows.map {
       row =>
-        val imageFuture = Future.traverse(row.words) {
+        val images = row.words.map {
           parsedWord =>
             if (parsedWord.wordBoundingBox.isDefined) {
-              Future(ImageCropper.cropBoundingBox(image, parsedWord.wordBoundingBox.get))
+              ImageCropper.cropBoundingBox(image, parsedWord.wordBoundingBox.get)
             }
             else {
-              Future(None)
+              None
             }
-        }
-        val images = Await.result(imageFuture, Duration.Inf).filter(img => img.isDefined).map(img => img.get)
-        Future(featureDetector.detectFeatures(images))
+        }.filter(img => img.isDefined).map(img => img.get)
+        featureDetector.detectFeatures(images)
     }
-    Await.result(documentFuture, Duration.Inf)
   }
 }
 
