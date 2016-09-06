@@ -6,10 +6,6 @@ import javax.imageio.ImageIO
 import models.document.Document
 import models.utils.ImageCropper
 
-import scala.concurrent._
-import scala.concurrent.duration.Duration
-import ExecutionContext.Implicits.global
-
 
 /**
   * Created by darkg on 04-Sep-16.

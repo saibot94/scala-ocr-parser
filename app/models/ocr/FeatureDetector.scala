@@ -7,8 +7,12 @@ import java.util.UUID
 import javax.imageio.ImageIO
 
 import models.config.AppConfig
-import net.sourceforge.tess4j.{ITesseract, Tesseract, Tesseract1}
+import net.sourceforge.tess4j.{ITesseract, Tesseract}
 
+
+import scala.concurrent._
+import scala.concurrent.duration.Duration
+import ExecutionContext.Implicits.global
 
 /**
   * Created by darkg on 03-Sep-16.
@@ -45,10 +49,11 @@ class FeatureDetector(dataPath: String) {
             instance.doOCR(w)
         }
       case true =>
-        words.map {
+        val detectFuture = Future.traverse(words) {
           w =>
-            doCommandLineTesseract(w)
+            Future(doCommandLineTesseract(w))
         }
+        Await.result(detectFuture, Duration.Inf)
     }
   }
 

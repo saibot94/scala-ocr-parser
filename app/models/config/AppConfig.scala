@@ -10,7 +10,6 @@ object AppConfig {
   val yScaleSize = scala.util.Properties.envOrElse("YSCALE_RESIZE", "720").toInt
   val blackAndWhiteFactor = scala.util.Properties.envOrElse("BW_FACTOR", "1.3").toFloat
   val brightenOffset = scala.util.Properties.envOrElse("BRIGHTEN_OFFSET", "1.0").toFloat
-  val energy = scala.util.Properties.envOrElse("ENERGY", "12 GeV")
   val boundingBoxExtraSpace = scala.util.Properties.envOrElse("BOUNDING_BOX_EXTRA_SPACE", "2").toInt
   val wordDetectPixelLimit = scala.util.Properties.envOrElse("WORD_DETECT_LIMIT", "2").toInt
   val resourcesFolder = scala.util.Properties.envOrElse("RESOURCE_FOLDER", "resources")
