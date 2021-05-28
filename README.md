@@ -1,6 +1,6 @@
-# licenta-ocr-parser
+# scala-ocr-parser
 
-A barebones Scala app (using the Play framework), which can easily be deployed to Heroku. 
+[![Deploy](https://deploy.zeet.co/scala-ocr-parser.svg)](https://deploy.zeet.co/?url=https://github.com/saibot94/scala-ocr-parser)
 
 ## Purpose 
 
